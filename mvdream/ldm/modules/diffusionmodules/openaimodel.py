@@ -1190,7 +1190,7 @@ class MultiViewUNetModel(nn.Module):
         """
 
         if DEBUG:
-            print("\n\n\n\n\n forward of multiview unet, x ")
+            print("\n\n\n\n\n forward of multiview unet, x shape", x.shape)
 
         assert x.shape[0] % num_frames == 0, "[UNet] input batch size must be dividable by num_frames!"
         assert (y is not None) == (
