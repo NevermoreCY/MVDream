@@ -875,6 +875,10 @@ class MultiViewUNetModel(nn.Module):
         camera_dim=None,
     ):
         super().__init__()
+
+        DEBUG= True
+        print("\n\n\n\n\n\n\n ***test")
+
         if DEBUG:
             print("\n\n\n\n\n\n ****** initialization of MultiViewUNetModel")
 
@@ -1188,6 +1192,7 @@ class MultiViewUNetModel(nn.Module):
         :param num_frames: a integer indicating number of frames for tensor reshaping.
         :return: an [(N x F) x C x ...] Tensor of outputs. F is the number of frames (views).
         """
+        DEBUG = True
 
         if DEBUG:
             print("\n\n\n\n\n forward of multiview unet, x shape", x.shape)
