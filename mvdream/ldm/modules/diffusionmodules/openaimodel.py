@@ -17,6 +17,7 @@ from .util import (
 )
 from ..attention import SpatialTransformer, SpatialTransformer3D, exists
 
+DEBUG = True
 
 # dummy replace
 def convert_module_to_f16(x):
@@ -874,10 +875,13 @@ class MultiViewUNetModel(nn.Module):
         camera_dim=None,
     ):
         super().__init__()
-        if use_spatial_transformer:
+        if DEBUG:
+            print("\n\n\n\n\n\n ****** initialization of MultiViewUNetModel")
+
+        if use_spatial_transformer: # True
             assert context_dim is not None, 'Fool!! You forgot to include the dimension of your cross-attention conditioning...'
 
-        if context_dim is not None:
+        if context_dim is not None: # int, 1024
             assert use_spatial_transformer, 'Fool!! You forgot to use the spatial transformer for your cross-attention conditioning...'
             from omegaconf.listconfig import ListConfig
             if type(context_dim) == ListConfig:
@@ -886,27 +890,29 @@ class MultiViewUNetModel(nn.Module):
         if num_heads_upsample == -1:
             num_heads_upsample = num_heads
 
+
+        # In this model, we set num_head_channels = 64
         if num_heads == -1:
             assert num_head_channels != -1, 'Either num_heads or num_head_channels has to be set'
 
         if num_head_channels == -1:
             assert num_heads != -1, 'Either num_heads or num_head_channels has to be set'
 
-        self.image_size = image_size
-        self.in_channels = in_channels
-        self.model_channels = model_channels
-        self.out_channels = out_channels
-        if isinstance(num_res_blocks, int):
+        self.image_size = image_size   # 32
+        self.in_channels = in_channels  # 4
+        self.model_channels = model_channels  # 320
+        self.out_channels = out_channels  # 4
+        if isinstance(num_res_blocks, int):  # int , 2
             self.num_res_blocks = len(channel_mult) * [num_res_blocks]
         else:
             if len(num_res_blocks) != len(channel_mult):
                 raise ValueError("provide num_res_blocks either as an int (globally constant) or "
                                  "as a list/tuple (per-level) with the same length as channel_mult")
             self.num_res_blocks = num_res_blocks
-        if disable_self_attentions is not None:
+        if disable_self_attentions is not None:  #None
             # should be a list of booleans, indicating whether to disable self-attention in TransformerBlocks or not
             assert len(disable_self_attentions) == len(channel_mult)
-        if num_attention_blocks is not None:
+        if num_attention_blocks is not None:  # none
             assert len(num_attention_blocks) == len(self.num_res_blocks)
             assert all(map(lambda i: self.num_res_blocks[i] >= num_attention_blocks[i], range(len(num_attention_blocks))))
             print(f"Constructor of UNetModel received num_attention_blocks={num_attention_blocks}. "
@@ -914,24 +920,24 @@ class MultiViewUNetModel(nn.Module):
                   f"i.e., in cases where num_attention_blocks[i] > 0 but 2**i not in attention_resolutions, "
                   f"attention will still not be set.")
 
-        self.attention_resolutions = attention_resolutions
-        self.dropout = dropout
-        self.channel_mult = channel_mult
-        self.conv_resample = conv_resample
-        self.num_classes = num_classes
-        self.use_checkpoint = use_checkpoint
+        self.attention_resolutions = attention_resolutions #[4,2,1]
+        self.dropout = dropout  # 0
+        self.channel_mult = channel_mult  #[1,2,4,4]
+        self.conv_resample = conv_resample  # True
+        self.num_classes = num_classes # None
+        self.use_checkpoint = use_checkpoint # False
         self.dtype = th.float16 if use_fp16 else th.float32
-        self.dtype = th.bfloat16 if use_bf16 else self.dtype
-        self.num_heads = num_heads
-        self.num_head_channels = num_head_channels
-        self.num_heads_upsample = num_heads_upsample
-        self.predict_codebook_ids = n_embed is not None
+        self.dtype = th.bfloat16 if use_bf16 else self.dtype  # float32
+        self.num_heads = num_heads # -1
+        self.num_head_channels = num_head_channels # 64
+        self.num_heads_upsample = num_heads_upsample  # -1
+        self.predict_codebook_ids = n_embed is not None  # None?
 
-        time_embed_dim = model_channels * 4
+        time_embed_dim = model_channels * 4  # 320 *4 = 1280
         self.time_embed = nn.Sequential(
-            linear(model_channels, time_embed_dim),
+            linear(model_channels, time_embed_dim),   # 320 -> 1280
             nn.SiLU(),
-            linear(time_embed_dim, time_embed_dim),
+            linear(time_embed_dim, time_embed_dim),  # 1280 -> 1280
         )
 
         if camera_dim is not None:
@@ -942,7 +948,7 @@ class MultiViewUNetModel(nn.Module):
                 linear(time_embed_dim, time_embed_dim),
             )
 
-        if self.num_classes is not None:
+        if self.num_classes is not None:  # None
             if isinstance(self.num_classes, int):
                 self.label_emb = nn.Embedding(num_classes, time_embed_dim)
             elif self.num_classes == "continuous":
@@ -1046,38 +1052,38 @@ class MultiViewUNetModel(nn.Module):
         else:
             num_heads = ch // num_head_channels
             dim_head = num_head_channels
-        if legacy:
-            #num_heads = 1
-            dim_head = ch // num_heads if use_spatial_transformer else num_head_channels
-        self.middle_block = TimestepEmbedSequential(
-            ResBlock(
-                ch,
-                time_embed_dim,
-                dropout,
-                dims=dims,
-                use_checkpoint=use_checkpoint,
-                use_scale_shift_norm=use_scale_shift_norm,
-            ),
-            AttentionBlock(
-                ch,
-                use_checkpoint=use_checkpoint,
-                num_heads=num_heads,
-                num_head_channels=dim_head,
-                use_new_attention_order=use_new_attention_order,
-            ) if not use_spatial_transformer else SpatialTransformer3D(  # always uses a self-attn
-                            ch, num_heads, dim_head, depth=transformer_depth, context_dim=context_dim,
-                            disable_self_attn=disable_middle_self_attn, use_linear=use_linear_in_transformer,
-                            use_checkpoint=use_checkpoint
-                        ),
-            ResBlock(
-                ch,
-                time_embed_dim,
-                dropout,
-                dims=dims,
-                use_checkpoint=use_checkpoint,
-                use_scale_shift_norm=use_scale_shift_norm,
-            ),
-        )
+        # if legacy: #False
+        #     #num_heads = 1
+        #     dim_head = ch // num_heads if use_spatial_transformer else num_head_channels
+        # self.middle_block = TimestepEmbedSequential(
+        #     ResBlock(
+        #         ch,
+        #         time_embed_dim,
+        #         dropout,
+        #         dims=dims,
+        #         use_checkpoint=use_checkpoint,
+        #         use_scale_shift_norm=use_scale_shift_norm,
+        #     ),
+        #     AttentionBlock(
+        #         ch,
+        #         use_checkpoint=use_checkpoint,
+        #         num_heads=num_heads,
+        #         num_head_channels=dim_head,
+        #         use_new_attention_order=use_new_attention_order,
+        #     ) if not use_spatial_transformer else SpatialTransformer3D(  # always uses a self-attn
+        #                     ch, num_heads, dim_head, depth=transformer_depth, context_dim=context_dim,
+        #                     disable_self_attn=disable_middle_self_attn, use_linear=use_linear_in_transformer,
+        #                     use_checkpoint=use_checkpoint
+        #                 ),
+        #     ResBlock(
+        #         ch,
+        #         time_embed_dim,
+        #         dropout,
+        #         dims=dims,
+        #         use_checkpoint=use_checkpoint,
+        #         use_scale_shift_norm=use_scale_shift_norm,
+        #     ),
+        # )
         self._feature_size += ch
 
         self.output_blocks = nn.ModuleList([])
@@ -1182,6 +1188,10 @@ class MultiViewUNetModel(nn.Module):
         :param num_frames: a integer indicating number of frames for tensor reshaping.
         :return: an [(N x F) x C x ...] Tensor of outputs. F is the number of frames (views).
         """
+
+        if DEBUG:
+            print("\n\n\n\n\n forward of multiview unet, x ")
+
         assert x.shape[0] % num_frames == 0, "[UNet] input batch size must be dividable by num_frames!"
         assert (y is not None) == (
             self.num_classes is not None
