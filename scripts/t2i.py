@@ -74,7 +74,7 @@ if __name__ == "__main__":
         assert args.ckpt_path is not None, "ckpt_path must be specified!"
         config = OmegaConf.load(args.config_path)
         model = instantiate_from_config(config.model)
-        model.load_state_dict(torch.load(args.ckpt_path, map_location='cpu'))
+        model.load_state_dict(torch.load(args.ckpt_path, map_location='cpu'),strict=False)
     model.device = device
     model.to(device)
     model.eval()
