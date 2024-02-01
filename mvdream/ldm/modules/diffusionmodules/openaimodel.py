@@ -1005,6 +1005,9 @@ class MultiViewUNetModel(nn.Module):
                     )
                 ]
                 ch = mult * model_channels
+
+
+
                 if ds in attention_resolutions: # attention_resolutions: [4,2,1]
 
 
@@ -1110,6 +1113,10 @@ class MultiViewUNetModel(nn.Module):
                 use_scale_shift_norm=use_scale_shift_norm,
             ),
         )
+
+        if DEBUG:
+            print('\n Middle block ch : ', ch , 'num_heads' , num_heads, 'dim head' , dim_head )
+
         self._feature_size += ch
 
         self.output_blocks = nn.ModuleList([])
