@@ -1218,9 +1218,9 @@ class MultiViewUNetModel(nn.Module):
             print("\n  camera shape", camera.shape)  #
             print("\n  timesteps shape", timesteps.shape)  #
             print("\n  t_emb shape", t_emb.shape)  #
-            print("\n  y shape", y.shape)  #
+            print("\n  y ", y )  #
             print("\n  emb shape", emb.shape)  #
-            print("\n  context shape", context.shape)  #
+            print("\n  context ", context)  #
 
         h = x.type(self.dtype)
         for module in self.input_blocks:
