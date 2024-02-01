@@ -1017,6 +1017,7 @@ class MultiViewUNetModel(nn.Module):
 
                     if DEBUG:
                         print("\n num_heads : ", num_heads, " dim_head" , dim_head)
+                        print("\n dsa : ", exists(disable_self_attentions), " N nab", not exists(num_attention_blocks))
 
                     if legacy:
                         #num_heads = 1
@@ -1045,6 +1046,10 @@ class MultiViewUNetModel(nn.Module):
                 input_block_chans.append(ch)
             if level != len(channel_mult) - 1:
                 out_ch = ch
+
+                if DEBUG:
+                    print('\n Extra Downsample block :', 'ch : ' , ch, 'out_ch : ', out_ch , 'Resblock_updown : ', resblock_updown )
+
                 self.input_blocks.append(
                     TimestepEmbedSequential(
                         ResBlock(
