@@ -1116,16 +1116,21 @@ class MultiViewUNetModel(nn.Module):
 
         if DEBUG:
             print('\n Middle block ch : ', ch , 'num_heads' , num_heads, 'dim head' , dim_head )
-
+            print('\n Decoder part: \n')
         self._feature_size += ch
 
         self.output_blocks = nn.ModuleList([])
+        for level, mult in list(enumerate(channel_mult))[::-1]:  # level: 3,2,1,0  mult: 4,4,2,1
+            for i in range(self.num_res_blocks[level] + 1):  #[3,3,3,3]
 
 
 
-        for level, mult in list(enumerate(channel_mult))[::-1]:
-            for i in range(self.num_res_blocks[level] + 1):
                 ich = input_block_chans.pop()
+
+                if DEBUG:
+                    print("\n Level :", level , ' Multi : ', mult , ' nr : ', i)
+                    print('\n resblock ch input', ch + ich , 'output ch:', model_channels * mult)
+
                 layers = [
                     ResBlock(
                         ch + ich,
@@ -1152,6 +1157,9 @@ class MultiViewUNetModel(nn.Module):
                     else:
                         disabled_sa = False
 
+                    if DEBUG:
+                        print('\n spatialTransformer3D num heads ', num_heads, ' dim_head ', dim_head)
+
                     if not exists(num_attention_blocks) or i < num_attention_blocks[level]:
                         layers.append(
                             AttentionBlock(
@@ -1167,6 +1175,10 @@ class MultiViewUNetModel(nn.Module):
                             )
                         )
                 if level and i == self.num_res_blocks[level]:
+
+                    if DEBUG:
+                        print('\n extra upsampling layer in ch', ch, ' out ch ', out_ch)
+
                     out_ch = ch
                     layers.append(
                         ResBlock(
