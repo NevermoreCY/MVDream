@@ -1056,38 +1056,38 @@ class MultiViewUNetModel(nn.Module):
         else:
             num_heads = ch // num_head_channels
             dim_head = num_head_channels
-        # if legacy: #False
-        #     #num_heads = 1
-        #     dim_head = ch // num_heads if use_spatial_transformer else num_head_channels
-        # self.middle_block = TimestepEmbedSequential(
-        #     ResBlock(
-        #         ch,
-        #         time_embed_dim,
-        #         dropout,
-        #         dims=dims,
-        #         use_checkpoint=use_checkpoint,
-        #         use_scale_shift_norm=use_scale_shift_norm,
-        #     ),
-        #     AttentionBlock(
-        #         ch,
-        #         use_checkpoint=use_checkpoint,
-        #         num_heads=num_heads,
-        #         num_head_channels=dim_head,
-        #         use_new_attention_order=use_new_attention_order,
-        #     ) if not use_spatial_transformer else SpatialTransformer3D(  # always uses a self-attn
-        #                     ch, num_heads, dim_head, depth=transformer_depth, context_dim=context_dim,
-        #                     disable_self_attn=disable_middle_self_attn, use_linear=use_linear_in_transformer,
-        #                     use_checkpoint=use_checkpoint
-        #                 ),
-        #     ResBlock(
-        #         ch,
-        #         time_embed_dim,
-        #         dropout,
-        #         dims=dims,
-        #         use_checkpoint=use_checkpoint,
-        #         use_scale_shift_norm=use_scale_shift_norm,
-        #     ),
-        # )
+        if legacy: #False
+            #num_heads = 1
+            dim_head = ch // num_heads if use_spatial_transformer else num_head_channels
+        self.middle_block = TimestepEmbedSequential(
+            ResBlock(
+                ch,
+                time_embed_dim,
+                dropout,
+                dims=dims,
+                use_checkpoint=use_checkpoint,
+                use_scale_shift_norm=use_scale_shift_norm,
+            ),
+            AttentionBlock(
+                ch,
+                use_checkpoint=use_checkpoint,
+                num_heads=num_heads,
+                num_head_channels=dim_head,
+                use_new_attention_order=use_new_attention_order,
+            ) if not use_spatial_transformer else SpatialTransformer3D(  # always uses a self-attn
+                            ch, num_heads, dim_head, depth=transformer_depth, context_dim=context_dim,
+                            disable_self_attn=disable_middle_self_attn, use_linear=use_linear_in_transformer,
+                            use_checkpoint=use_checkpoint
+                        ),
+            ResBlock(
+                ch,
+                time_embed_dim,
+                dropout,
+                dims=dims,
+                use_checkpoint=use_checkpoint,
+                use_scale_shift_norm=use_scale_shift_norm,
+            ),
+        )
         self._feature_size += ch
 
         self.output_blocks = nn.ModuleList([])
@@ -1215,12 +1215,12 @@ class MultiViewUNetModel(nn.Module):
 
         if DEBUG:
             print("\n\n\n\n\n forward of multiview unet, x shape", x.shape)  # [8,4,32,32]
-            print("\n  camera shape", camera.shape)  #
-            print("\n  timesteps shape", timesteps.shape)  #
-            print("\n  t_emb shape", t_emb.shape)  #
-            print("\n  y ", y )  #
-            print("\n  emb shape", emb.shape)  #
-            print("\n  context shape", context.shape)  #
+            print("\n  camera shape", camera.shape)  # [8,16]
+            print("\n  timesteps shape", timesteps.shape)  # [8]
+            print("\n  t_emb shape", t_emb.shape)  # [8, 320]
+            print("\n  y ", y )  # None
+            print("\n  emb shape", emb.shape)  #  [8,1280]
+            print("\n  context shape", context.shape)  # [8,77,1024]
 
         h = x.type(self.dtype)
         for module in self.input_blocks:
