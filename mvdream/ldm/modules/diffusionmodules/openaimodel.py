@@ -983,8 +983,16 @@ class MultiViewUNetModel(nn.Module):
         input_block_chans = [model_channels]
         ch = model_channels
         ds = 1
+
+        if DEBUG:
+            print('\n\n\n num_res_blocks are ',self.num_res_blocks)
+
         for level, mult in enumerate(channel_mult):  # [1 , 2 ,4 ,4 ]
-            for nr in range(self.num_res_blocks[level]):
+            for nr in range(self.num_res_blocks[level]):  #[2,2,2,2]
+
+                if DEBUG:
+                    print("\n Level :", level , ' Multi : ', mult , ' nr : ', nr)
+                    print('\n ch before resblock', ch )
                 layers = [
                     ResBlock(
                         ch,
@@ -997,12 +1005,19 @@ class MultiViewUNetModel(nn.Module):
                     )
                 ]
                 ch = mult * model_channels
-                if ds in attention_resolutions: # attention_resolutions: []
-                    if num_head_channels == -1:
+                if ds in attention_resolutions: # attention_resolutions: [4,2,1]
+
+
+
+                    if num_head_channels == -1:  # 64
                         dim_head = ch // num_heads
                     else:
                         num_heads = ch // num_head_channels
                         dim_head = num_head_channels
+
+                    if DEBUG:
+                        print("\n num_heads : ", num_heads, " dim_head" , dim_head)
+
                     if legacy:
                         #num_heads = 1
                         dim_head = ch // num_heads if use_spatial_transformer else num_head_channels
@@ -1058,7 +1073,7 @@ class MultiViewUNetModel(nn.Module):
         else:
             num_heads = ch // num_head_channels
             dim_head = num_head_channels
-        if legacy: #False
+        if legacy:
             #num_heads = 1
             dim_head = ch // num_heads if use_spatial_transformer else num_head_channels
         self.middle_block = TimestepEmbedSequential(
@@ -1093,8 +1108,7 @@ class MultiViewUNetModel(nn.Module):
         self._feature_size += ch
 
         self.output_blocks = nn.ModuleList([])
-        if DEBUG:
-            print('/n/n/n/ num_res_blocks are ',self.num_res_blocks)
+
 
 
         for level, mult in list(enumerate(channel_mult))[::-1]:
