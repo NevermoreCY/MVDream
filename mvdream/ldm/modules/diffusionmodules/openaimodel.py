@@ -1245,6 +1245,7 @@ class MultiViewUNetModel(nn.Module):
             assert camera.shape[0] == emb.shape[0]
             emb = emb + self.camera_embed(camera)
 
+        DEBUG =False
         if DEBUG:
             print("\n\n\n\n\n forward of multiview unet, x shape", x.shape)  # [8,4,32,32]
             print("\n  camera shape", camera.shape)  # [8,16]
