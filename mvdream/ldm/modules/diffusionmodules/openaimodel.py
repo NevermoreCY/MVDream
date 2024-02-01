@@ -907,7 +907,7 @@ class MultiViewUNetModel(nn.Module):
         self.model_channels = model_channels  # 320
         self.out_channels = out_channels  # 4
         if isinstance(num_res_blocks, int):  # int , 2
-            self.num_res_blocks = len(channel_mult) * [num_res_blocks]
+            self.num_res_blocks = len(channel_mult) * [num_res_blocks]  # [2,2,2,2] ?
         else:
             if len(num_res_blocks) != len(channel_mult):
                 raise ValueError("provide num_res_blocks either as an int (globally constant) or "
@@ -923,6 +923,8 @@ class MultiViewUNetModel(nn.Module):
                   f"This option has LESS priority than attention_resolutions {attention_resolutions}, "
                   f"i.e., in cases where num_attention_blocks[i] > 0 but 2**i not in attention_resolutions, "
                   f"attention will still not be set.")
+
+
 
         self.attention_resolutions = attention_resolutions #[4,2,1]
         self.dropout = dropout  # 0
@@ -981,7 +983,7 @@ class MultiViewUNetModel(nn.Module):
         input_block_chans = [model_channels]
         ch = model_channels
         ds = 1
-        for level, mult in enumerate(channel_mult):
+        for level, mult in enumerate(channel_mult):  # [1 , 2 ,4 ,4 ]
             for nr in range(self.num_res_blocks[level]):
                 layers = [
                     ResBlock(
@@ -1091,6 +1093,10 @@ class MultiViewUNetModel(nn.Module):
         self._feature_size += ch
 
         self.output_blocks = nn.ModuleList([])
+        if DEBUG:
+            print('/n/n/n/ num_res_blocks are ',self.num_res_blocks)
+
+
         for level, mult in list(enumerate(channel_mult))[::-1]:
             for i in range(self.num_res_blocks[level] + 1):
                 ich = input_block_chans.pop()
