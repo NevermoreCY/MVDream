@@ -995,7 +995,7 @@ class MultiViewUNetModel(nn.Module):
                     )
                 ]
                 ch = mult * model_channels
-                if ds in attention_resolutions:
+                if ds in attention_resolutions: # attention_resolutions: []
                     if num_head_channels == -1:
                         dim_head = ch // num_heads
                     else:
@@ -1192,10 +1192,9 @@ class MultiViewUNetModel(nn.Module):
         :param num_frames: a integer indicating number of frames for tensor reshaping.
         :return: an [(N x F) x C x ...] Tensor of outputs. F is the number of frames (views).
         """
-        DEBUG = True
 
-        if DEBUG:
-            print("\n\n\n\n\n forward of multiview unet, x shape", x.shape)
+
+
 
         assert x.shape[0] % num_frames == 0, "[UNet] input batch size must be dividable by num_frames!"
         assert (y is not None) == (
@@ -1213,6 +1212,15 @@ class MultiViewUNetModel(nn.Module):
         if camera is not None:
             assert camera.shape[0] == emb.shape[0]
             emb = emb + self.camera_embed(camera)
+
+        if DEBUG:
+            print("\n\n\n\n\n forward of multiview unet, x shape", x.shape)  # [8,4,32,32]
+            print("\n  camera shape", camera.shape)  #
+            print("\n  timesteps shape", timesteps.shape)  #
+            print("\n  t_emb shape", t_emb.shape)  #
+            print("\n  y shape", y.shape)  #
+            print("\n  emb shape", emb.shape)  #
+            print("\n  context shape", context.shape)  #
 
         h = x.type(self.dtype)
         for module in self.input_blocks:
