@@ -90,7 +90,7 @@ class DDIMSampler(object):
         # sampling
         C, H, W = shape
         size = (batch_size, C, H, W)
-
+        print("\n\n\n Line 93 conditioning : ", conditioning)
         samples, intermediates = self.ddim_sampling(conditioning, size,
                                                     callback=callback,
                                                     img_callback=img_callback,
@@ -144,6 +144,8 @@ class DDIMSampler(object):
                 img_orig = self.model.q_sample(x0, ts)  # TODO: deterministic forward pass?
                 img = img_orig * mask + (1. - mask) * img
 
+
+            print('\n\n\n line 148 p_sample_ddim cond : ', cond )
             outs = self.p_sample_ddim(img, cond, ts, index=index, use_original_steps=ddim_use_original_steps,
                                       quantize_denoised=quantize_denoised, temperature=temperature,
                                       noise_dropout=noise_dropout, score_corrector=score_corrector,
@@ -194,6 +196,7 @@ class DDIMSampler(object):
                     c_in.append(torch.cat([unconditional_conditioning[i], c[i]]))
             else:
                 c_in = torch.cat([unconditional_conditioning, c])
+            print('\n\n\n line 199 model.apply_model , c_in : ', c_in, ' t_in : ',t_in, )
             model_uncond, model_t = self.model.apply_model(x_in, t_in, c_in).chunk(2)
             # model_t = self.model.apply_model(x, t, c, **kwargs)
             # model_uncond = self.model.apply_model(x, t, unconditional_conditioning, **kwargs)
