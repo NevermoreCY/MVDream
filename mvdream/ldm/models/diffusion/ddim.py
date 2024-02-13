@@ -146,6 +146,10 @@ class DDIMSampler(object):
 
 
             print('\n\n\n line 148 p_sample_ddim cond : ', type(cond) )
+
+            for key in cond:
+                print(key , cond[key].shape)
+
             outs = self.p_sample_ddim(img, cond, ts, index=index, use_original_steps=ddim_use_original_steps,
                                       quantize_denoised=quantize_denoised, temperature=temperature,
                                       noise_dropout=noise_dropout, score_corrector=score_corrector,
@@ -197,6 +201,9 @@ class DDIMSampler(object):
             else:
                 c_in = torch.cat([unconditional_conditioning, c])
             print('\n\n\n line 199 model.apply_model , c_in : ', type(c_in), ' t_in : ',t_in.shape, )
+            for key in c_in:
+                print(key , c_in[key].shape)
+
             model_uncond, model_t = self.model.apply_model(x_in, t_in, c_in).chunk(2)
             # model_t = self.model.apply_model(x, t, c, **kwargs)
             # model_uncond = self.model.apply_model(x, t, unconditional_conditioning, **kwargs)
