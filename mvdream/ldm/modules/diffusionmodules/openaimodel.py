@@ -17,7 +17,7 @@ from .util import (
 )
 from ..attention import SpatialTransformer, SpatialTransformer3D, exists
 
-DEBUG = True
+DEBUG = False
 
 # dummy replace
 def convert_module_to_f16(x):
@@ -876,7 +876,7 @@ class MultiViewUNetModel(nn.Module):
     ):
         super().__init__()
 
-        DEBUG= True
+        DEBUG = False
         print("\n\n\n\n\n\n\n ***test")
 
         if DEBUG:
