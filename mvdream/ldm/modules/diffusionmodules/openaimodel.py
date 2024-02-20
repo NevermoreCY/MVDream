@@ -1248,7 +1248,7 @@ class MultiViewUNetModel(nn.Module):
         t_emb = timestep_embedding(timesteps, self.model_channels, repeat_only=False)
         emb = self.time_embed(t_emb)
 
-        if self.num_classes is not None:
+        if self.num_classes is not None:  # Is None
             assert y.shape[0] == x.shape[0]
             emb = emb + self.label_emb(y)
 
