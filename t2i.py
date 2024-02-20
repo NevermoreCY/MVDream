@@ -30,7 +30,7 @@ def t2i(model, image_size, prompt, uc, sampler, step=20, scale=7.5, batch_size=8
             c_["camera"] = uc_["camera"] = camera
             c_["num_frames"] = uc_["num_frames"] = num_frames
 
-        print('c_ is :', c_ )
+        print('\n\n c_ context shape is :', c_['context'].shape )
 
         shape = [4, image_size // 8, image_size // 8]
         samples_ddim, _ = sampler.sample(S=step, conditioning=c_,
@@ -90,11 +90,11 @@ if __name__ == "__main__":
         camera = get_camera(args.num_frames, elevation=args.camera_elev, 
                 azimuth_start=args.camera_azim, azimuth_span=args.camera_azim_span)
 
-        print("/n/n camera before repeat", camera)
+        print("/n/n camera before repeat", camera.shape)
 
         camera = camera.repeat(batch_size//args.num_frames,1).to(device)
 
-        print("/n/n camera after repeat", camera)
+        print("/n/n camera after repeat", camera.shape)
     else:
         camera = None
     
