@@ -87,7 +87,12 @@ if __name__ == "__main__":
     if args.use_camera:
         camera = get_camera(args.num_frames, elevation=args.camera_elev, 
                 azimuth_start=args.camera_azim, azimuth_span=args.camera_azim_span)
+
+        print("/n/n camera before repeat", camera)
+
         camera = camera.repeat(batch_size//args.num_frames,1).to(device)
+
+        print("/n/n camera after repeat", camera)
     else:
         camera = None
     
