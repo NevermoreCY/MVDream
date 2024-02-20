@@ -30,6 +30,8 @@ def t2i(model, image_size, prompt, uc, sampler, step=20, scale=7.5, batch_size=8
             c_["camera"] = uc_["camera"] = camera
             c_["num_frames"] = uc_["num_frames"] = num_frames
 
+        print('c_ is :', c_ )
+
         shape = [4, image_size // 8, image_size // 8]
         samples_ddim, _ = sampler.sample(S=step, conditioning=c_,
                                         batch_size=batch_size, shape=shape,
