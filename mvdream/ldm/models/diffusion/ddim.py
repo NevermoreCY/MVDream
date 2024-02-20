@@ -178,6 +178,13 @@ class DDIMSampler(object):
                       dynamic_threshold=None, **kwargs):
         b, *_, device = *x.shape, x.device
 
+        print('\n\n\n Before data process model.apply_model , c_in : ', type(c), ' t_in : ',t.shape, 'x_in', x.shape )
+        for key in c:
+            if type(c[key]) == int:
+                print(key, c[key])
+            else:
+                print(key, c[key].shape)
+
         if unconditional_conditioning is None or unconditional_guidance_scale == 1.:
             model_output = self.model.apply_model(x, t, c)
         else:
@@ -205,18 +212,17 @@ class DDIMSampler(object):
                     c_in.append(torch.cat([unconditional_conditioning[i], c[i]]))
             else:
                 c_in = torch.cat([unconditional_conditioning, c])
-            print('\n\n\n line 199 model.apply_model , c_in : ', type(c_in), ' t_in : ',t_in.shape, 'x_in', x_in.shape )
+            # print('\n\n\n line 199 model.apply_model , c_in : ', type(c_in), ' t_in : ',t_in.shape, 'x_in', x_in.shape )
+            # for key in c_in:
+            #     if type(c_in[key]) == int:
+            #         print(key, c_in[key])
+            #     else:
+            #         print(key, c_in[key].shape)
 
-            # line 199 model.apply_model , c_in :  <class 'dict'>  t_in :  torch.Size([8])
+            # line 199 model.apply_model , c_in :  <class 'dict'>  t_in :  torch.Size([8]) x_in torch.Size([8, 4, 32, 32])
             # context torch.Size([8, 77, 1024])
             # camera torch.Size([8, 16])
             # num_frames 4
-
-            for key in c_in:
-                if type(c_in[key]) == int:
-                    print(key, c_in[key])
-                else:
-                    print(key, c_in[key].shape)
 
             model_uncond, model_t = self.model.apply_model(x_in, t_in, c_in).chunk(2)
             # model_t = self.model.apply_model(x, t, c, **kwargs)
