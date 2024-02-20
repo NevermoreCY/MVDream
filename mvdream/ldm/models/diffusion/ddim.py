@@ -146,7 +146,8 @@ class DDIMSampler(object):
 
 
             # print('\n\n\n line 148 p_sample_ddim cond : ', type(cond) )
-            DEBUG=False
+            DEBUG = False
+
             if DEBUG:
                 for key in cond:
                     if type(cond[key]) == int:
