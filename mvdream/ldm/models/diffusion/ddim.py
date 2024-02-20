@@ -90,7 +90,7 @@ class DDIMSampler(object):
         # sampling
         C, H, W = shape
         size = (batch_size, C, H, W)
-        print("\n\n\n Line 93 conditioning : ", type(conditioning))
+        # print("\n\n\n Line 93 conditioning : ", type(conditioning))
         samples, intermediates = self.ddim_sampling(conditioning, size,
                                                     callback=callback,
                                                     img_callback=img_callback,
@@ -145,7 +145,7 @@ class DDIMSampler(object):
                 img = img_orig * mask + (1. - mask) * img
 
 
-            print('\n\n\n line 148 p_sample_ddim cond : ', type(cond) )
+            # print('\n\n\n line 148 p_sample_ddim cond : ', type(cond) )
 
             for key in cond:
                 if type(cond[key]) == int:
@@ -181,7 +181,7 @@ class DDIMSampler(object):
         else:
             x_in = torch.cat([x] * 2)
             t_in = torch.cat([t] * 2)
-            if isinstance(c, dict):
+            if isinstance(c, dict): # our case
                 assert isinstance(unconditional_conditioning, dict)
                 c_in = dict()
                 for k in c:
@@ -189,7 +189,7 @@ class DDIMSampler(object):
                         c_in[k] = [torch.cat([
                             unconditional_conditioning[k][i],
                             c[k][i]]) for i in range(len(c[k]))]
-                    elif isinstance(c[k], torch.Tensor):
+                    elif isinstance(c[k], torch.Tensor):  # should be tensors
                         c_in[k] = torch.cat([
                                 unconditional_conditioning[k],
                                 c[k]])
@@ -203,7 +203,13 @@ class DDIMSampler(object):
                     c_in.append(torch.cat([unconditional_conditioning[i], c[i]]))
             else:
                 c_in = torch.cat([unconditional_conditioning, c])
-            print('\n\n\n line 199 model.apply_model , c_in : ', type(c_in), ' t_in : ',t_in.shape, )
+            # print('\n\n\n line 199 model.apply_model , c_in : ', type(c_in), ' t_in : ',t_in.shape, )
+
+            # line 199 model.apply_model , c_in :  <class 'dict'>  t_in :  torch.Size([8])
+            # context torch.Size([8, 77, 1024])
+            # camera torch.Size([8, 16])
+            # num_frames 4
+
             for key in c_in:
                 if type(c_in[key]) == int:
                     print(key, c_in[key])
