@@ -146,12 +146,13 @@ class DDIMSampler(object):
 
 
             # print('\n\n\n line 148 p_sample_ddim cond : ', type(cond) )
-
-            for key in cond:
-                if type(cond[key]) == int:
-                    print(key, cond[key])
-                else:
-                    print(key , cond[key].shape)
+            DEBUG=False
+            if DEBUG:
+                for key in cond:
+                    if type(cond[key]) == int:
+                        print(key, cond[key])
+                    else:
+                        print(key , cond[key].shape)
 
             outs = self.p_sample_ddim(img, cond, ts, index=index, use_original_steps=ddim_use_original_steps,
                                       quantize_denoised=quantize_denoised, temperature=temperature,
