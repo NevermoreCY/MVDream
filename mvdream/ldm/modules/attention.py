@@ -286,7 +286,7 @@ class SpatialTransformer(nn.Module):
     """
     def __init__(self, in_channels, n_heads, d_head,
                  depth=1, dropout=0., context_dim=None,
-                 disable_self_attn=False, use_linear=False,
+                 disable_self_attn=False, use_linear=False, # use linear = TRue
                  use_checkpoint=True):
         super().__init__()
         if exists(context_dim) and not isinstance(context_dim, list):
