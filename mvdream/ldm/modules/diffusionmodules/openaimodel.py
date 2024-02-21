@@ -1226,7 +1226,7 @@ class MultiViewUNetModel(nn.Module):
         self.middle_block.apply(convert_module_to_f32)
         self.output_blocks.apply(convert_module_to_f32)
 
-    def forward(self, x, timesteps=None, context=None, y=None, camera=None, num_frames=1, **kwargs):
+    def forward(self, x, timesteps=None, context=None, y=None, camera=None, num_frames=4, **kwargs):
         """
         Apply the model to an input batch.
         :param x: an [(N x F) x C x ...] Tensor of inputs. F is the number of frames (views).
