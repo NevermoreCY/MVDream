@@ -30,7 +30,7 @@ def t2i(model, image_size, prompt, uc, sampler, step=20, scale=7.5, batch_size=8
             c_["camera"] = uc_["camera"] = camera
             c_["num_frames"] = uc_["num_frames"] = num_frames
 
-        print('\n\n c_ context shape is :', c_['context'].shape )
+        print('\n\n c_ context shape is :', c_['context'].shape )  # [4,77,1024]
 
         shape = [4, image_size // 8, image_size // 8]
         samples_ddim, _ = sampler.sample(S=step, conditioning=c_,
@@ -40,6 +40,7 @@ def t2i(model, image_size, prompt, uc, sampler, step=20, scale=7.5, batch_size=8
                                         unconditional_conditioning=uc_,
                                         eta=ddim_eta, x_T=None)
         x_sample = model.decode_first_stage(samples_ddim)
+        print("\n\n x_samples_cfg shape is : ", x_samples_cfg.shape)
         x_sample = torch.clamp((x_sample + 1.0) / 2.0, min=0.0, max=1.0)
         x_sample = 255. * x_sample.permute(0,2,3,1).cpu().numpy()
 
